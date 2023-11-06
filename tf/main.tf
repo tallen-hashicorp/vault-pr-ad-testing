@@ -60,7 +60,6 @@ user_data = <<-EOF
     <powershell>
     @"
     # Get the current server hostname
-    `$serverHostname` = `$env:COMPUTERNAME`
 
     # Install Active Directory Domain Services (AD DS)
     Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
@@ -69,10 +68,10 @@ user_data = <<-EOF
     Install-ADDSForest -DomainName "${var.domain_name}" -SafeModeAdministratorPassword (ConvertTo-SecureString -AsPlainText -Force -String "${var.password}") -Force
 
     # Install AD CS
-    #Install-WindowsFeature ADCS-Cert-Authority -IncludeManagementTools
+    Install-WindowsFeature ADCS-Cert-Authority -IncludeManagementTools
 
     # Config AD CS and CA
-    #Install-ADcsCertificationAuthority -CAType StandaloneRootCA –CACommonName "`$serverHostname`" –CADistinguishedNameSuffix "${local.dc_formatted}" –CryptoProviderName "RSA#Microsoft Software Key Storage Provider" -KeyLength 2048 –HashAlgorithmName SHA1 –ValidityPeriod Years –ValidityPeriodUnits 3 –DatabaseDirectory "C:\windows\system32\certLog" –LogDirectory "c:\windows\system32\CertLog" –Force
+    Install-ADcsCertificationAuthority -CAType StandaloneRootCA –CACommonName "`hostname`" –CADistinguishedNameSuffix "${local.dc_formatted}" –CryptoProviderName "RSA#Microsoft Software Key Storage Provider" -KeyLength 2048 –HashAlgorithmName SHA1 –ValidityPeriod Years –ValidityPeriodUnits 3 –DatabaseDirectory "C:\windows\system32\certLog" –LogDirectory "c:\windows\system32\CertLog" –Force
 
     # Restart the server for changes to take effect
     Restart-Computer -Force
@@ -93,22 +92,21 @@ resource "aws_security_group" "windows_server" {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
- #   cidr_blocks = [var.public_ip]
-    cidr_blocks = ["${chomp(data.http.ip_check.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = 389
     to_port     = 389
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.ip_check.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = 636
     to_port     = 636
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.ip_check.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # Add any other ports needed for your specific requirements

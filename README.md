@@ -99,7 +99,54 @@ vault write sys/replication/performance/secondary/enable token=<token>
 
 ## Testing AD With the PRs
 
+### AD Setup
+For this I went through the following [guide](https://wiki.articatech.com/en/active-directory/active-directory-ldap-ssl-windows-2022) on the windows server
+
 ### Overview and Setup
 Note: The Active Directory (AD) secrets engine has been deprecated as of the Vault 1.13 release. We will continue to support the AD secrets engine in maintenance mode for six major Vault releases. Maintenance mode means that we will fix bugs and security issues but will not add new features. For additional information, see the deprecation table and migration guide.
 
-I've cleaned up the formatting, added code block syntax highlighting, and improved the overall readability of your markdown content.
+**On Primary** Since its recomended to make all writes to the primary thats how I'm going to start. Ensure you update the `<ldap_username>`, `<ldap_password>` & `<ldap_url>` during the first 3 exports. 
+
+```bash
+export USERNAME=<ldap_username>
+export PASSWORD=<ldap_password>
+export LDAP_URL=<ldap_url>
+
+vault secrets enable ad
+
+vault write ad/config \
+    binddn=$USERNAME \
+    bindpass=$PASSWORD \
+    url=ldaps://$LDAP_URL \
+    insecure_tls=true \
+    userdn='dc=tyler,dc=home'
+
+vault write ad/roles/my-application \
+    service_account_name="my-application@tyler.home" insecure_tls=true
+
+vault read ad/roles/my-application
+```
+
+### Testing getting creds on primary
+
+```bash
+vault read ad/creds/my-application
+```
+
+Using TCP dump I can see the traffic flow during this are as follows
+```mermaid
+  graph TD;
+      A-->B;
+      A-->C;
+      B-->D;
+      C-->D;
+```
+
+
+
+
+vault write ad/library/accounting-team \
+    service_account_names=my-application@tyler.home \
+    ttl=10h \
+    max_ttl=20h \
+    disable_check_in_enforcement=false
