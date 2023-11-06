@@ -192,7 +192,10 @@ Code: 500. Errors:
 	* request error returned from primary: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 172.31.46.225:8201: connect: connection refused"
 ```
 
-### Testing with LDAP Dynamic Creds
+### Testing with Static Dynamic Creds
+
+`vault read /ldap/static-cred/hashicorp` works on the PR if the Primary is down however the TTL will not get renewed
+
 ```bash
 vault secrets enable ldap
 
@@ -218,11 +221,11 @@ sequenceDiagram
     participant vp as Vault Primary
     participant vpr as Vault PR
     participant ad as Active Directory
-    c->>vp: vault write ldap/static-role/hashicorp ttl=10m
+    c->>vp: vault write ldap/static-role/hashicorp rotation_period=5s
     vp->>ad: rotate password
     vp->>c: Success! Data written to: ldap/static-role/hashicorp
     vp->>vpr: "replcate stroage"
-    loop Every 10 minutes
+    loop Every 5 seconds
         vp->>ad: rotate password
         vp->>vpr: "replcate stroage"
     end
