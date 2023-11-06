@@ -203,11 +203,13 @@ Code: 500. Errors:
 	* request error returned from primary: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 172.31.46.225:8201: connect: connection refused"
 ```
 
+Here's your cleaned-up content in Markdown format:
+
 ## LDAP Secrets Engine
 
 ### Testing with Static Credentials
 
-The command `vault read /ldap/static-cred/hashicorp` works on the PR even when the Primary is down. However, the TTL will not get renewed.
+You can use the following command to test static credentials with the LDAP secrets engine. This command works on the PR even when the Primary is down. However, please note that the TTL will not get renewed.
 
 ```bash
 vault secrets enable ldap
@@ -228,6 +230,8 @@ vault write ldap/static-role/hashicorp \
 vault read /ldap/static-cred/hashicorp
 ```
 
+The following sequence diagram illustrates the interaction when using static credentials:
+
 ```mermaid
 sequenceDiagram
     actor c as Client
@@ -242,7 +246,7 @@ sequenceDiagram
         vp->>ad: rotate password
         vp->>vpr: "replicate storage"
     end
-    alt if hiting Primary
+    alt if hitting Primary
         c->>vp: vault read /ldap/static-cred/hashicorp
         vp->>c: Return credentials
     else if hitting PR
@@ -253,13 +257,16 @@ sequenceDiagram
 
 ### Testing with Dynamic Credentials
 
-First copy over the ldifs, change `[VAULT_SERVER]` to point to your vault server
+To test with dynamic credentials, follow these steps:
+
+1. Copy over the LDIF files and change `[VAULT_SERVER]` to point to your Vault server:
 
 ```bash
 scp -r ldifs/* ubuntu@[VAULT_SERVER]:
 ```
 
-Then configure vault on the server
+2. Configure Vault on the server:
+
 ```bash
 vault write ldap/role/dynamic-role \
   creation_ldif=@/home/ubuntu/creation.ldif \
@@ -267,12 +274,14 @@ vault write ldap/role/dynamic-role \
   default_ttl=10s \
   username_template="v_{{unix_time}}" \
   max_ttl=24h
+
 vault read ldap/creds/dynamic-role
 ```
 
-This works via a PR if the Primary is down:
+This configuration works via a PR if the Primary is down. Below are sequence diagrams illustrating the interactions for the Primary and PR:
 
 ### Primary
+
 ```mermaid
 sequenceDiagram
     actor c as Client
@@ -288,6 +297,7 @@ sequenceDiagram
 ```
 
 ### PR
+
 ```mermaid
 sequenceDiagram
     actor c as Client
