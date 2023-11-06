@@ -133,20 +133,76 @@ vault read ad/roles/my-application
 vault read ad/creds/my-application
 ```
 
-Using TCP dump I can see the traffic flow during this are as follows
+Using TCP dump I can see the traffic flow during this are as follows. This goes from the primary to the AD server
 ```mermaid
-  graph TD;
-      A-->B;
-      A-->C;
-      B-->D;
-      C-->D;
+sequenceDiagram
+    actor c as Client
+    participant vp as Vault Primary
+    participant vpr as Vault PR
+    participant ad as Active Directory
+    c->>vp: vault read ad/creds/my-application
+    vp->>ad: LDAPS - Get Creds
+    ad->>vp: Return Creds
+    vp->>c: Return Creds
 ```
 
+### Testing getting creds on PR
 
+```bash
+vault read ad/creds/my-application
+```
 
+In this case we see the same thing if the PR is alive, traffic goes from the primary
 
+```mermaid
+sequenceDiagram
+    actor c as Client
+    participant vpr as Vault PR
+    participant vp as Vault Primary
+    participant ad as Active Directory
+    c->>vpr: vault read ad/creds/my-application
+    vpr->>vp:  ad/creds/my-application
+    vp->>ad: LDAPS - Get Creds
+    ad->>vp: Return Creds
+    vr->>vpr: Return Creds
+    vpr->>c: Return Creds
+```
+
+### Testing getting creds on PR with Primary down
+
+Primary:
+
+```bash
+sudo systemctl stop vault
+```
+
+PR:
+```bash
+vault read ad/creds/my-application
+```
+
+This returned the following error
+
+```text
+Error reading ad/creds/my-application: Error making API request.
+
+URL: GET http://127.0.0.1:8200/v1/ad/creds/my-application
+Code: 500. Errors:
+
+* 1 error occurred:
+	* request error returned from primary: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 172.31.46.225:8201: connect: connection refused"
+```
+
+### Quick Testing getting creds on primary
+```bash
 vault write ad/library/accounting-team \
     service_account_names=my-application@tyler.home \
-    ttl=10h \
+    ttl=30s \
     max_ttl=20h \
     disable_check_in_enforcement=false
+
+vault read ad/library/accounting-team/status
+
+vault write -f ad/library/accounting-team/check-out
+vault write -f ad/library/accounting-team/check-in
+```
