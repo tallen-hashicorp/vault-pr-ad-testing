@@ -138,7 +138,6 @@ Using TCP dump I can see the traffic flow during this are as follows. This goes 
 sequenceDiagram
     actor c as Client
     participant vp as Vault Primary
-    participant vpr as Vault PR
     participant ad as Active Directory
     c->>vp: vault read ad/creds/my-application
     vp->>ad: LDAPS - Get Creds
