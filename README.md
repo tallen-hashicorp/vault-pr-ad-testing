@@ -2,7 +2,7 @@
 Testing details on the AD Engine using PR's
 
 ## Setup Lab Infrastructure
-We will use AWS for AD and our 2 VMS, one for Vault Primary and Vault PR and set this up using terraform
+We will use AWS for AD and our 2 VMs, one for Vault Primary and Vault PR, and set this up using Terraform.
 
 ### Create TF Vars
 ```bash
@@ -18,21 +18,23 @@ terraform apply
 
 ## Setup Vault
 
-### Copy Licence File
-** Change licence file to point at your vault.hclic**
+### Copy License File
+**Change license file to point at your vault.hclic**
 ```bash
 scp vault.hclic ubuntu@[VAULT_SERVER]:
 ```
 
 ### Copy the config files over
-This copies over the template for vault and a python script used to update it
+This copies over the template for Vault and a Python script used to update it.
 ```bash
 scp vault.hcl ubuntu@[VAULT_SERVER]:
 scp setup-vault.py ubuntu@[VAULT_SERVER]:
 ```
 
+```bash
 scp setup-vault.py ubuntu@3.67.148.6:
 scp setup-vault.py ubuntu@3.79.90.4:
+```
 
 ### Install Vault
 **Do this for both the servers**
@@ -65,7 +67,7 @@ vault operator unseal
 ```
 
 ### Setup PR on Primary
-**Remember to change the password** when creating the tester user. Also take a note of the secondary token generated here
+**Remember to change the password** when creating the tester user. Also, take note of the secondary token generated here.
 ```bash
 ssh ubuntu@[VAULT_PRIMARY_SERVER]
 
@@ -84,8 +86,8 @@ vault write -f sys/replication/performance/primary/enable
 vault write sys/replication/performance/primary/secondary-token id=PR
 ```
 
-### Setip PR on PR
-Replace <token> with the step aboves secondary token. You also need to replace <primary_IP_addr> with the primarys IP address
+### Set up PR on PR
+Replace `<token>` with the step above's secondary token. You also need to replace `<primary_IP_addr>` with the primary's IP address.
 ```bash
 ssh ubuntu@[VAULT_PR_SERVER]
 
@@ -94,3 +96,10 @@ vault login
 
 vault write sys/replication/performance/secondary/enable token=<token>
 ```
+
+## Testing AD With the PRs
+
+### Overview and Setup
+Note: The Active Directory (AD) secrets engine has been deprecated as of the Vault 1.13 release. We will continue to support the AD secrets engine in maintenance mode for six major Vault releases. Maintenance mode means that we will fix bugs and security issues but will not add new features. For additional information, see the deprecation table and migration guide.
+
+I've cleaned up the formatting, added code block syntax highlighting, and improved the overall readability of your markdown content.
