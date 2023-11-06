@@ -1,10 +1,10 @@
 # vault-pr-ad-testing
-Testing details on the AD Engine using PR's
+In this document, we will detail the process of setting up and testing the AD Engine using PRs (Performance Replication) in HashiCorp Vault. This includes setting up the lab infrastructure, configuring Vault, and testing various scenarios.
 
 ## Setup Lab Infrastructure
-We will use AWS for AD and our 2 VMs, one for Vault Primary and Vault PR, and set this up using Terraform.
+We will use AWS for the Active Directory (AD) and two virtual machines (VMs) - one for Vault Primary and one for Vault PR. We will set up this infrastructure using Terraform.
 
-### Create TF Vars
+### Create Terraform Variables
 ```bash
 python3 setup-tfvars.py --username tyadmin --password random --domain_name tyler.home --ami_id ami-07b63a0cdc48e61fb --pem_path "~/.ssh/id_rsa" --pub_path "~/.ssh/id_rsa.pub"
 ```
@@ -17,19 +17,24 @@ terraform apply
 ```
 
 ## Setup Vault
+Before using Vault, we need to configure and set it up properly.
 
 ### Copy License File
-**Change license file to point at your vault.hclic**
+Change the license file to point to your `vault.hclic` file.
+
 ```bash
 scp vault.hclic ubuntu@[VAULT_SERVER]:
 ```
 
-### Copy the config files over
-This copies over the template for Vault and a Python script used to update it.
+### Copy Configuration Files
+Copy the Vault configuration files, including the template for Vault and a Python script used to update it.
+
 ```bash
 scp vault.hcl ubuntu@[VAULT_SERVER]:
 scp setup-vault.py ubuntu@[VAULT_SERVER]:
 ```
+
+Then, replicate these files to the PR server as well.
 
 ```bash
 scp setup-vault.py ubuntu@3.67.148.6:
@@ -37,12 +42,12 @@ scp setup-vault.py ubuntu@3.79.90.4:
 ```
 
 ### Install Vault
-**Do this for both the servers**
+Install Vault on both the primary and PR servers. Follow these steps for each server.
 
 ```bash
 ssh ubuntu@[VAULT_SERVER]
 
-## Install Vault
+# Install Vault
 sudo apt update && sudo apt install gpg
 wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
@@ -53,11 +58,11 @@ sudo cp ~/vault.hclic /etc/vault.d/
 sudo cp ~/vault.hcl /etc/vault.d/vault.hcl
 sudo python3 ~/setup-vault.py
 
-## Start Vault
+# Start Vault
 sudo systemctl enable vault.service
 sudo systemctl start vault
 
-## Setup Vault
+# Setup Vault
 export VAULT_ADDR="http://127.0.0.1:8200"
 vault status
 vault operator init
@@ -67,7 +72,8 @@ vault operator unseal
 ```
 
 ### Setup PR on Primary
-**Remember to change the password** when creating the tester user. Also, take note of the secondary token generated here.
+Make sure to change the password when creating the tester user. Also, take note of the secondary token generated here.
+
 ```bash
 ssh ubuntu@[VAULT_PRIMARY_SERVER]
 
@@ -87,7 +93,8 @@ vault write sys/replication/performance/primary/secondary-token id=PR
 ```
 
 ### Set up PR on PR
-Replace `<token>` with the step above's secondary token. You also need to replace `<primary_IP_addr>` with the primary's IP address.
+Replace `<token>` with the secondary token generated in the previous step. Also, replace `<primary_IP_addr>` with the primary's IP address.
+
 ```bash
 ssh ubuntu@[VAULT_PR_SERVER]
 
@@ -100,12 +107,12 @@ vault write sys/replication/performance/secondary/enable token=<token>
 ## Testing AD With the PRs
 
 ### AD Setup
-For this, I went through the following [guide](https://wiki.articatech.com/en/active-directory/active-directory-ldap-ssl-windows-2022) on the Windows server
+For this, we followed the guide available at [this link](https://wiki.articatech.com/en/active-directory/active-directory-ldap-ssl-windows-2022) on the Windows server.
 
 ### Overview and Setup
-Note: The Active Directory (AD) secrets engine has been deprecated as of the Vault 1.13 release. We will continue to support the AD secrets engine in maintenance mode for six major Vault releases. Maintenance mode means that we will fix bugs and security issues but will not add new features. For additional information, see the deprecation table and migration guide.
+It's important to note that the Active Directory (AD) secrets engine has been deprecated as of Vault 1.13. It will continue to be supported in maintenance mode for six major Vault releases. Maintenance mode means that it will receive bug fixes and security updates but no new features. Refer to the deprecation table and migration guide for additional information.
 
-**On Primary** Since it's recommended to make all writes to the primary, that's how I'm going to start. Ensure you update the `<ldap_username>`, `<ldap_password>`, and `<ldap_url>` during the first 3 exports. 
+**On Primary:** To start, it is recommended to make all writes to the primary. Make sure to update the `<ldap_username>`, `<ldap_password>`, and `<ldap_url>` during the first 3 exports.
 
 ```bash
 export USERNAME=<ldap_username>
@@ -127,13 +134,14 @@ vault write ad/roles/my-application \
 vault read ad/roles/my-application
 ```
 
-### Testing getting creds on primary
+### Testing Getting Credentials on Primary
 
 ```bash
 vault read ad/creds/my-application
 ```
 
-Using TCP dump, I can see the traffic flow during this as follows. This goes from the primary to the AD server
+Using TCP dump, we can observe the traffic flow during this operation, which goes from the primary to the AD server.
+
 ```mermaid
 sequenceDiagram
     actor c as Client
@@ -145,13 +153,13 @@ sequenceDiagram
     vp->>c: Return Creds
 ```
 
-### Testing getting creds on PR
+### Testing Getting Credentials on PR
 
 ```bash
 vault read ad/creds/my-application
 ```
 
-In this case, we see the same thing if the PR is alive; traffic goes from the primary
+In this case, we observe the same flow if the PR is operational; traffic goes from the primary.
 
 ```mermaid
 sequenceDiagram
@@ -160,14 +168,16 @@ sequenceDiagram
     participant vp as Vault Primary
     participant ad as Active Directory
     c->>vpr: vault read ad/creds/my-application
-    vpr->>vp:  ad/creds/my-application
+    vpr->>vp: ad/creds/my-application
     vp->>ad: LDAPS - Get Creds
     ad->>vp: Return Creds
     vp->>vpr: Return Creds
     vpr->>c: Return Creds
 ```
 
-### Testing getting creds on PR with Primary down
+### Testing Getting Credentials on PR with Primary Down
+
+If the primary server is down:
 
 Primary:
 
@@ -176,11 +186,12 @@ sudo systemctl stop vault
 ```
 
 PR:
+
 ```bash
 vault read ad/creds/my-application
 ```
 
-This returned the following error
+This results in the following error:
 
 ```text
 Error reading ad/creds/my-application: Error making API request.
@@ -194,9 +205,9 @@ Code: 500. Errors:
 
 ## LDAP Secrets Engine
 
-### Testing with Static Creds
+### Testing with Static Credentials
 
-`vault read /ldap/static-cred/hashicorp` works on the PR if the Primary is down however the TTL will not get renewed
+The command `vault read /ldap/static-cred/hashicorp` works on the PR even when the Primary is down. However, the TTL will not get renewed.
 
 ```bash
 vault secrets enable ldap
@@ -226,14 +237,15 @@ sequenceDiagram
     c->>vp: vault write ldap/static-role/hashicorp rotation_period=5s
     vp->>ad: rotate password
     vp->>c: Success! Data written to: ldap/static-role/hashicorp
-    vp->>vpr: "replicate stroage"
+    vp->>vpr: "replicate storage"
     loop Every 5 seconds
         vp->>ad: rotate password
-        vp->>vpr: "replicate stroage"
+        vp->>vpr: "replicate storage"
     end
-    c->>vp:vault read /ldap/static-cred/hashicorp
-    vp->>c:return creds
-    c->>vpr:vault read /ldap/static-cred/hashicorp
-    vpr->>c:return creds
+    c->>vp: vault read /ldap/static-cred/hashicorp
+    vp->>c: Return credentials
+    c->>vpr: vault read /ldap/static-cred/hashicorp
+    vpr->>c: Return credentials
 ```
 
+This comprehensive document outlines the steps for setting up and testing the AD Engine using PRs, with detailed explanations and diagrams for various scenarios.
