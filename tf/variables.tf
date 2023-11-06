@@ -25,7 +25,7 @@ variable "ami_id" {
 
 variable "instance_type" {
   description = "AWS instance type"
-  default     = "t3.medium"
+  default     = "t2.medium"
 }
 
 variable "sbpemkey" {

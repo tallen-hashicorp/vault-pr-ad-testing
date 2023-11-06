@@ -214,7 +214,7 @@ resource "aws_instance" "example" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "DELETE_ME"
+    Name = "Vault-Server-${count.index}"
   }
 }
 
