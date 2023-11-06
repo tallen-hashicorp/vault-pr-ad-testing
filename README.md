@@ -242,10 +242,13 @@ sequenceDiagram
         vp->>ad: rotate password
         vp->>vpr: "replicate storage"
     end
-    c->>vp: vault read /ldap/static-cred/hashicorp
-    vp->>c: Return credentials
-    c->>vpr: vault read /ldap/static-cred/hashicorp
-    vpr->>c: Return credentials
+    alt if hiting Primary
+        c->>vp: vault read /ldap/static-cred/hashicorp
+        vp->>c: Return credentials
+    else if hitting PR
+        c->>vpr: vault read /ldap/static-cred/hashicorp
+        vpr->>c: Return credentials
+    end
 ```
 
 This comprehensive document outlines the steps for setting up and testing the AD Engine using PRs, with detailed explanations and diagrams for various scenarios.
