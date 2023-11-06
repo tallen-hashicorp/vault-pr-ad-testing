@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("--username", default="random", help="Username (or 'random' for random value)")
     parser.add_argument("--password", default="random", help="Password (or 'random' for random value)")
     parser.add_argument("--domain_name", default="janlab.home", help="Domain Name")
-    parser.add_argument("--ami_id", default="ami-005f8adf84f8c5057", help="AMI ID")
+    parser.add_argument("--ami_id", default="ami-07b63a0cdc48e61fb", help="AMI ID")
     parser.add_argument("--pem_path", default="~/.ssh/id_rsa", help="PEM Key Path")
     parser.add_argument("--pub_path", default="~/.ssh/id_rsa.pub", help="Public Key Path")
 
