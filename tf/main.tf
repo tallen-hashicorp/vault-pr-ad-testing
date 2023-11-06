@@ -1,8 +1,7 @@
 terraform {
   required_providers {
-    template = {
-      source = "hashicorp/template"
-      version = "2.2.0"  # Use the version that is compatible with your Terraform version
+    aws = {
+      source  = "hashicorp/aws"
     }
   }
 }
@@ -144,7 +143,7 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_key_pair" "ssh_key" {
   key_name   = "ssh_key"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = file(var.sbpubkey)
 }
 
 resource "aws_security_group" "ssh_access" {
@@ -161,7 +160,7 @@ resource "aws_security_group" "ssh_access" {
 
 resource "aws_security_group" "vault_access" {
   name        = "vault_access_sg"
-  description = "Security group allowing inbound boundary access"
+  description = "Security group allowing inbound vault access"
 
   ingress {
     from_port   = 8200
@@ -210,7 +209,7 @@ resource "aws_instance" "example" {
   count                       = var.instance_count
   ami                         = "${data.aws_ami.ubuntu.id}"
   instance_type               = "t3.small"
-  vpc_security_group_ids      = ["${aws_security_group.ssh_access.id}", "${aws_security_group.boundary_access.id}", "${aws_security_group.internal_traffic.id}", "${aws_security_group.vault_access.id}"]
+  vpc_security_group_ids      = ["${aws_security_group.ssh_access.id}", "${aws_security_group.internal_traffic.id}", "${aws_security_group.vault_access.id}"]
   key_name                    = aws_key_pair.ssh_key.key_name
   associate_public_ip_address = true
 

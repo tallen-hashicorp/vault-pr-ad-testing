@@ -32,6 +32,10 @@ variable "sbpemkey" {
   description = "Sandbox PEM private key file"
 }
 
+variable "sbpubkey" {
+  description = "Sandbox ssh public key file"
+}
+
 # The number of instances required
 variable "instance_count" {
   default = 2
