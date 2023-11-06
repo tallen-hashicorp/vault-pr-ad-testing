@@ -251,4 +251,53 @@ sequenceDiagram
     end
 ```
 
-This comprehensive document outlines the steps for setting up and testing the AD Engine using PRs, with detailed explanations and diagrams for various scenarios.
+### Testing with Dynamic Credentials
+
+First copy over the ldifs, change `[VAULT_SERVER]` to point to your vault server
+
+```bash
+scp -r ldifs/* ubuntu@[VAULT_SERVER]:
+```
+
+Then configure vault on the server
+```bash
+vault write ldap/role/dynamic-role \
+  creation_ldif=@/home/ubuntu/creation.ldif \
+  deletion_ldif=@/home/ubuntu/deletion.ldif \
+  default_ttl=10s \
+  username_template="v_{{unix_time}}" \
+  max_ttl=24h
+vault read ldap/creds/dynamic-role
+```
+
+This works via a PR if the Primary is down:
+
+### Primary
+```mermaid
+sequenceDiagram
+    actor c as Client
+    participant vp as Vault Primary
+    participant ad as Active Directory
+    c->>vp: vault read ldap/creds/dynamic-role
+    vp->>ad: Create User
+    ad->>vp: Return Creds
+    vp->>c: Return Creds
+    break when TTL Expires
+        vp->>ad: Delete User
+    end
+```
+
+### PR
+```mermaid
+sequenceDiagram
+    actor c as Client
+    participant vpr as Vault PR
+    participant ad as Active Directory
+    c->>vpr: vault read ldap/creds/dynamic-role
+    vpr->>ad: Create User
+    ad->>vpr: Return Creds
+    vpr->>c: Return Creds
+    break when TTL Expires
+        vpr->>ad: Delete User
+    end
+```

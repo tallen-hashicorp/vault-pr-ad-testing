@@ -1,2 +1,2 @@
-replace: userAccountControl
-userAccountControl: 66048
+dn: cn={{.Username}},CN=Users,DC=tyler,DC=home
+changetype: delete

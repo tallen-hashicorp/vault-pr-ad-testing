@@ -1,4 +1,0 @@
-dn: CN=test-group,OU=HashiVault,DC=adtesting,DC=lab
-changetype: modify
-add: member
-member: CN={{.Username}},OU=HashiVault,DC=adtesting,DC=lab

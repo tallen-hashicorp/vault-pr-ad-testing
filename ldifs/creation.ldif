@@ -1,13 +1,14 @@
-dn: CN={{.Username}},OU=HashiVault,DC=adtesting,DC=lab
+dn: CN={{.Username}},CN=Users,DC=tyler,DC=home
 changetype: add
 objectClass: top
 objectClass: person
 objectClass: organizationalPerson
 objectClass: user
-userPrincipalName: {{.Username}}@adtesting.lab
+userPrincipalName: {{.Username}}@tyler.home
 sAMAccountName: {{.Username}}
 
-dn: CN={{.Username}},OU=HashiVault,DC=adtesting,DC=lab
+dn: CN={{.Username}},CN=Users,DC=tyler,DC=home
 changetype: modify
 replace: unicodePwd
 unicodePwd::{{ printf "%q" .Password | utf16le | base64 }}
+-
