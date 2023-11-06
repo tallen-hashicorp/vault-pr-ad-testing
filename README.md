@@ -163,7 +163,7 @@ sequenceDiagram
     vpr->>vp:  ad/creds/my-application
     vp->>ad: LDAPS - Get Creds
     ad->>vp: Return Creds
-    vr->>vpr: Return Creds
+    vp->>vpr: Return Creds
     vpr->>c: Return Creds
 ```
 
