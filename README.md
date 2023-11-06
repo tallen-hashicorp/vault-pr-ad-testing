@@ -100,12 +100,12 @@ vault write sys/replication/performance/secondary/enable token=<token>
 ## Testing AD With the PRs
 
 ### AD Setup
-For this I went through the following [guide](https://wiki.articatech.com/en/active-directory/active-directory-ldap-ssl-windows-2022) on the windows server
+For this, I went through the following [guide](https://wiki.articatech.com/en/active-directory/active-directory-ldap-ssl-windows-2022) on the Windows server
 
 ### Overview and Setup
 Note: The Active Directory (AD) secrets engine has been deprecated as of the Vault 1.13 release. We will continue to support the AD secrets engine in maintenance mode for six major Vault releases. Maintenance mode means that we will fix bugs and security issues but will not add new features. For additional information, see the deprecation table and migration guide.
 
-**On Primary** Since its recomended to make all writes to the primary thats how I'm going to start. Ensure you update the `<ldap_username>`, `<ldap_password>` & `<ldap_url>` during the first 3 exports. 
+**On Primary** Since it's recommended to make all writes to the primary, that's how I'm going to start. Ensure you update the `<ldap_username>`, `<ldap_password>`, and `<ldap_url>` during the first 3 exports. 
 
 ```bash
 export USERNAME=<ldap_username>
@@ -133,7 +133,7 @@ vault read ad/roles/my-application
 vault read ad/creds/my-application
 ```
 
-Using TCP dump I can see the traffic flow during this are as follows. This goes from the primary to the AD server
+Using TCP dump, I can see the traffic flow during this as follows. This goes from the primary to the AD server
 ```mermaid
 sequenceDiagram
     actor c as Client
@@ -151,7 +151,7 @@ sequenceDiagram
 vault read ad/creds/my-application
 ```
 
-In this case we see the same thing if the PR is alive, traffic goes from the primary
+In this case, we see the same thing if the PR is alive; traffic goes from the primary
 
 ```mermaid
 sequenceDiagram
