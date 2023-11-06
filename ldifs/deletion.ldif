@@ -1,0 +1,2 @@
+replace: userAccountControl
+userAccountControl: 66048
