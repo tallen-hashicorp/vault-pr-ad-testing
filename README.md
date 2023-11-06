@@ -192,16 +192,43 @@ Code: 500. Errors:
 	* request error returned from primary: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 172.31.46.225:8201: connect: connection refused"
 ```
 
-### Quick Testing getting creds on primary
+### Testing with LDAP Dynamic Creds
 ```bash
-vault write ad/library/accounting-team \
-    service_account_names=my-application@tyler.home \
-    ttl=30s \
-    max_ttl=20h \
-    disable_check_in_enforcement=false
+vault secrets enable ldap
 
-vault read ad/library/accounting-team/status
+vault write ldap/config \
+    binddn=$USERNAME \
+    bindpass=$PASSWORD \
+    url=ldaps://$LDAP_URL \
+    insecure_tls=true \
+    schema=ad \
+    password_policy=example
 
-vault write -f ad/library/accounting-team/check-out
-vault write -f ad/library/accounting-team/check-in
+vault write ldap/static-role/hashicorp \
+    dn="CN=hashicorp hashicorp,CN=Users,DC=tyler,DC=home" \
+    username='hashicorp' \
+    rotation_period="5s"
+
+vault read /ldap/static-cred/hashicorp
 ```
+
+```mermaid
+sequenceDiagram
+    actor c as Client
+    participant vp as Vault Primary
+    participant vpr as Vault PR
+    participant ad as Active Directory
+    c->>vp: vault write ldap/static-role/hashicorp ttl=10m
+    vp->>ad: rotate password
+    vp->>c: Success! Data written to: ldap/static-role/hashicorp
+    vp->>vpr: "replcate stroage"
+    loop Every 10 minutes
+        vp->>ad: rotate password
+        vp->>vpr: "replcate stroage"
+    end
+    c->>vp:vault read /ldap/static-cred/hashicorp
+    vp->>c:return creds
+    c->>vpr:vault read /ldap/static-cred/hashicorp
+    vpr->>c:return creds
+```
+
