@@ -6,7 +6,7 @@ We will use AWS for AD and our 2 VMS, one for Vault Primary and Vault PR and set
 
 ### Create TF Vars
 ```bash
-python3 setup-tfvars.py --username tyadmin --password random --domain_name tyler.home --ami_id ami-02076a196031326b2 --pem_path "~/.ssh/id_rsa" --pub_path "~/.ssh/id_rsa.pub"
+python3 setup-tfvars.py --username tyadmin --password random --domain_name tyler.home --ami_id ami-005f8adf84f8c5057 --pem_path "~/.ssh/id_rsa" --pub_path "~/.ssh/id_rsa.pub"
 ```
 
 ### Run Terraform
