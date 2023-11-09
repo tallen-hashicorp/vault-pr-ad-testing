@@ -203,8 +203,6 @@ Code: 500. Errors:
 	* request error returned from primary: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 172.31.46.225:8201: connect: connection refused"
 ```
 
-Here's your cleaned-up content in Markdown format:
-
 ## LDAP Secrets Engine
 
 ### Testing with Static Credentials
