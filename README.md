@@ -207,7 +207,7 @@ Code: 500. Errors:
 
 ### Testing with Static Credentials
 
-You can use the following command to test static credentials with the LDAP secrets engine. This command works on the PR even when the Primary is down. However, please note that the TTL will not get renewed.
+You can use the following command to test static credentials with the LDAP secrets engine. This command works on the PR even when the Primary is down. However, please note that the TTL may not get renewed if the Primary is down.
 
 ```bash
 vault secrets enable ldap
