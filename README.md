@@ -1,8 +1,8 @@
-# vault-pr-ad-testing
-In this document, we will detail the process of setting up and testing the AD Engine using PRs (Performance Replication) in HashiCorp Vault. This includes setting up the lab infrastructure, configuring Vault, and testing various scenarios.
+# Vault PR AD Testing
+In this document, we will detail the process of setting up and testing the AD & LDAP Engine's using PRs (Performance Replication) in HashiCorp Vault. This includes setting up the lab infrastructure, configuring Vault, and testing various scenarios.
 
 ## Setup Lab Infrastructure
-We will use AWS for the Active Directory (AD) and two virtual machines (VMs) - one for Vault Primary and one for Vault PR. We will set up this infrastructure using Terraform.
+We will use AWS for the Active Directory (AD) and two EC2 instances - one for Vault Primary and one for Vault PR. We will set up this infrastructure using Terraform.
 
 ### Create Terraform Variables
 ```bash
@@ -20,7 +20,7 @@ terraform apply
 Before using Vault, we need to configure and set it up properly.
 
 ### Copy License File
-Change the license file to point to your `vault.hclic` file.
+This example uses Vault Enterprice, you will need to copy over your licence file to the server in order to activate vault-ent. Change the license file to point to your `vault.hclic` file.
 
 ```bash
 scp vault.hclic ubuntu@[VAULT_SERVER]:
