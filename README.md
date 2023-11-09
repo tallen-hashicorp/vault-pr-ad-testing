@@ -112,7 +112,7 @@ For this, we followed the guide available at [this link](https://wiki.articatech
 ### Overview and Setup
 It's important to note that the Active Directory (AD) secrets engine has been deprecated as of Vault 1.13. It will continue to be supported in maintenance mode for six major Vault releases. Maintenance mode means that it will receive bug fixes and security updates but no new features. Refer to the deprecation table and migration guide for additional information.
 
-**On Primary:** To start, it is recommended to make all writes to the primary. Make sure to update the `<ldap_username>`, `<ldap_password>`, and `<ldap_url>` during the first 3 exports.
+**On Primary:** To start, we will make all writes to the primary. Make sure to update the `<ldap_username>`, `<ldap_password>`, and `<ldap_url>` during the first 3 exports.
 
 ```bash
 export USERNAME=<ldap_username>
