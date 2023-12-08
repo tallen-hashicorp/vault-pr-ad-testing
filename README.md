@@ -148,7 +148,10 @@ sequenceDiagram
     participant vp as Vault Primary
     participant ad as Active Directory
     c->>vp: vault read ad/creds/my-application
-    vp->>ad: LDAPS - Get Creds
+    vp->>ad: LDAPS - Get Creds Timestamp
+    alt Cred required rotating
+        vp->>ad: Set Creds
+    end
     ad->>vp: Return Creds
     vp->>c: Return Creds
 ```
@@ -169,7 +172,10 @@ sequenceDiagram
     participant ad as Active Directory
     c->>vpr: vault read ad/creds/my-application
     vpr->>vp: ad/creds/my-application
-    vp->>ad: LDAPS - Get Creds
+    vp->>ad: LDAPS - Get Creds Timestamp
+    alt Cred required rotating
+        vp->>ad: Set Creds
+    end
     ad->>vp: Return Creds
     vp->>vpr: Return Creds
     vpr->>c: Return Creds
