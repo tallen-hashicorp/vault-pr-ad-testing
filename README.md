@@ -152,7 +152,6 @@ sequenceDiagram
     alt Cred required rotating
         vp->>ad: LDAPS - UpdatePassword(ServiceAccountName, newPassword)
     end
-    ad->>vp: Return Creds
     vp->>c: Return Creds
 ```
 
@@ -176,7 +175,6 @@ sequenceDiagram
     alt Cred required rotating
         vp->>ad: LDAPS -  UpdatePassword(ServiceAccountName, newPassword)
     end
-    ad->>vp: Return Creds
     vp->>vpr: Return Creds
     vpr->>c: Return Creds
 ```
